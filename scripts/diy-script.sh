@@ -12,22 +12,30 @@ sed -i -E 's|^root:[^:]*:|root::|' package/base-files/files/etc/shadow
 echo "[diy] 移除旧版冲突包"
 rm -rf feeds/packages/net/mosdns feeds/packages/net/dae feeds/packages/net/daed package/feeds/luci/luci-app-dae package/feeds/luci/luci-app-daed package/v2ray-geodata
 
-# 3. 完美的智能防报错克隆函数（物归原主 🌟）
+# 3. 彻底修复翻车隐患的智能防报错克隆函数（移除危险的缩写替换，改用最稳健的 if 判断）
 clone_if_missing() {
-  local repo="$1" branch="$2" dest="$3"
+  local repo="$1"
+  local branch="$2"
+  local dest="$3"
+  
   if [ -d "$dest" ]; then
     echo "[diy] 跳过已存在的仓库: $dest"
   else
-    echo "[diy] 克隆: $repo -> $dest"
-    git clone --depth=1 ${branch:+-b "$branch"} "$repo" "$dest"
+    if [ -z "$branch" ]; then
+      echo "[diy] 克隆默认分支: $repo -> $dest"
+      git clone --depth=1 "$repo" "$dest"
+    else
+      echo "[diy] 克隆专属分支 [-b $branch]: $repo -> $dest"
+      git clone --depth=1 -b "$branch" "$repo" "$dest"
+    fi
   fi
 }
 
-# 4. 使用你的高级函数克隆最新版 DAED、MosDNS 以及规则包
+# 4. 【核心对表】使用修正后的安全参数进行克隆（不带任何干扰的空双引号，第2个参数不写代表默认分支）
 echo "[diy] 开始克隆最新版 DAED、MosDNS 及规则包"
-clone_if_missing https://github.com/QiuSimons/luci-app-daed "" package/dae
-clone_if_missing https://github.com/sbwml/luci-app-mosdns -b v5 "" package/luci-app-mosdns
-clone_if_missing https://github.com/sbwml/v2ray-geodata "" package/v2ray-geodata
+clone_if_missing "https://github.com/QiuSimons/luci-app-daed" ""   "package/dae"
+clone_if_missing "https://github.com/sbwml/luci-app-mosdns"   "v5" "package/luci-app-mosdns"
+clone_if_missing "https://github.com/sbwml/v2ray-geodata"     ""   "package/v2ray-geodata"
 
 # 5. 刷新 feeds 确保系统底层依赖完备
 ./scripts/feeds update -a
