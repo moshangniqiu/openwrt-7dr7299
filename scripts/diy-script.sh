@@ -115,7 +115,6 @@ main() {
   # ============================================
   log "注入底层补丁，强制忽略 DAED 的 OPKG 依赖检查"
   if [ -d "package/dae" ]; then
-    # 查找并修改 Makefile
     local makefile_count=0
     while IFS= read -r makefile; do
       sed -i 's/DEPENDS:=.*/& +kmod-xdp-sockets-diag/g' "$makefile"
@@ -145,7 +144,7 @@ main() {
     sed -i "s/^VERSION_NUMBER:=.*/VERSION_NUMBER:=-$date_version by Imouto-Advanced/" "$version_file"
   fi
   
-  log "配置完成 ✓"
+  log "✓ 配置完成"
 }
 
 # 执行主函数
