@@ -33,7 +33,11 @@ clone_if_missing https://github.com/sbwml/v2ray-geodata "" package/v2ray-geodata
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
-# 6. 修改固件版本号为当天编译日期
+# 6. 【核心修复】强行豁免 DAED 的依赖检查，注入对高级用户忽略依赖的支持
+echo "[diy] 注入底层补丁，强制忽略 DAED 的 OPKG 依赖检查"
+find package/dae -name "Makefile" -type f -exec sed -i 's/DEPENDS:=.*/& +kmod-xdp-sockets-diag/g' {} + 2>/dev/null || true
+
+# 7. 修改固件版本号为当天编译日期
 DATE_VERSION="$(date +%Y.%m.%d)"
 VERSION_FILE="include/version.mk"
 echo "[diy] 修改版本为编译日期: $DATE_VERSION"
