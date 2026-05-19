@@ -1,51 +1,9 @@
-# =========================================================
-# config.extra
-# =========================================================
-
-# ---------------------------------------------------------
-# DDNS
-# ---------------------------------------------------------
-CONFIG_PACKAGE_ddns-scripts=y
-CONFIG_PACKAGE_ddns-scripts-services=y
-CONFIG_PACKAGE_luci-app-ddns=y
-CONFIG_PACKAGE_luci-i18n-ddns-zh-cn=y
-
-# ---------------------------------------------------------
-# DiskMan
-# ---------------------------------------------------------
-CONFIG_PACKAGE_luci-app-diskman=y
-CONFIG_PACKAGE_luci-app-diskman_INCLUDE_btrfs_progs=y
-CONFIG_PACKAGE_luci-app-diskman_INCLUDE_kmod_md_linears=y
-CONFIG_PACKAGE_luci-app-diskman_INCLUDE_kmod_md_raid456=y
-CONFIG_PACKAGE_luci-app-diskman_INCLUDE_lsblk=y
-CONFIG_PACKAGE_luci-app-diskman_INCLUDE_mdadm=y
-CONFIG_PACKAGE_luci-i18n-diskman-zh-cn=y
-
 # ---------------------------------------------------------
 # Argon Theme
 # ---------------------------------------------------------
 CONFIG_PACKAGE_luci-theme-argon=y
 CONFIG_PACKAGE_luci-app-argon-config=y
 CONFIG_PACKAGE_luci-i18n-argon-config-zh-cn=y
-
-# ---------------------------------------------------------
-# passwall
-# ---------------------------------------------------------
-CONFIG_PACKAGE_luci-app-passwall=y
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Haproxy is not set
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Hysteria is not set
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_NaiveProxy is not set
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Rust_Client is not set
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Rust_Server is not set
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadow_TLS is not set
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Simple_Obfs is not set
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_SingBox is not set
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_tuic_client is not set
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Geodata=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Geoview=y
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Plugin is not set
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray=y
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray_Plugin is not set
 
 # ---------------------------------------------------------
 # Daed
@@ -55,31 +13,3 @@ CONFIG_PACKAGE_luci-app-daed=y
 CONFIG_PACKAGE_luci-i18n-daed-zh-cn=y
 CONFIG_PACKAGE_v2ray-geoip=y
 CONFIG_PACKAGE_v2ray-geosite=y
-
-# ---------------------------------------------------------
-# EasyTier
-# ---------------------------------------------------------
-CONFIG_PACKAGE_easytier=y
-CONFIG_PACKAGE_luci-app-easytier=y
-
-# ---------------------------------------------------------
-# ZeroTier
-# ---------------------------------------------------------
-CONFIG_PACKAGE_zerotier=y
-CONFIG_PACKAGE_luci-app-zerotier=y
-CONFIG_PACKAGE_luci-i18n-zerotier-zh-cn=y
-
-# ---------------------------------------------------------
-# RTP2HTTPD
-# ---------------------------------------------------------
-CONFIG_PACKAGE_rtp2httpd=n
-CONFIG_PACKAGE_luci-app-rtp2httpd=n
-CONFIG_PACKAGE_luci-i18n-rtp2httpd-zh-cn=n
-
-# ---------------------------------------------------------
-# msd_lite
-# ---------------------------------------------------------
-CONFIG_PACKAGE_luci-app-msd_lite=n
-CONFIG_PACKAGE_luci-i18n-msd_lite-zh-cn=n
-# ---------------------------------------------------------
-
