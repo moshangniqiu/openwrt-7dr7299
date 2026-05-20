@@ -87,18 +87,20 @@ main() {
   # ============================================
   log "开始克隆最新版 MosDNS 源码"
   # 克隆成熟的 MosDNS v5 分支（带完整中文面板）
-  if ! clone_if_missing "https://github.com/sbwml/luci-app-mosdns" "v5" "package/luci-app-mosdns"; then
+  if ! clone_if_missing "https://github.com" "v5" "package/luci-app-mosdns"; then
     return 1
   fi
 
-  # 占位：克隆专属的 daed 汉化语言包（不含主程序 Makefile，编译绝不报错！）
-  # 这样刷机后你手装 daed 的 IPK 时，系统会自动切到中文界面
-  log "克隆 daed 中文语言包用于固件占位..."
-  if ! clone_if_missing "https://github.com/QiuSimons/luci-app-daed" "main" "package/daed-i18n-placeholder"; then
+  # 修复核心：QiuSimons 的仓库真实主分支为 master，修正分支参数防止编译报错
+  log "克隆 daed 语言包用于固件占位..."
+  if ! clone_if_missing "https://github.com/QiuSimons/luci-app-daed" "master" "package/daed-i18n-placeholder"; then
     return 1
   fi
-  # 骚操作：只保留语言包的 i18n 目录，把会引发编译报错的主程序和面板 Makefile 全部删掉
-  find package/daed-i18n-placeholder -maxdepth 1 ! -name 'luci-i18n-daed-zh-cn' ! -name 'daed-i18n-placeholder' -exec rm -rf {} + 2>/dev/null || true
+  
+  # 骚操作提取：只保留语言包所需的 i18n 翻译目录和核心文件，移除非必要的编译干扰
+  log "清洗 daed 临时目录，仅保留基础本地化文件..."
+  mv package/daed-i18n-placeholder/luci-app-daed/po package/daed-i18n-placeholder/ 2>/dev/null || true
+  find package/daed-i18n-placeholder -maxdepth 1 ! -name 'po' ! -name 'daed-i18n-placeholder' -exec rm -rf {} + 2>/dev/null || true
   
   # ============================================
   # 4. 满血刷新 feeds 补充缺失的 Python/Zabbix 依赖
