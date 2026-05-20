@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE}")/.." && pwd)"
 readonly LOG_PREFIX="[diy]"
 
 # 日志函数
@@ -18,7 +18,7 @@ check_file_exists() {
   fi
 }
 
-# 安全的克隆函数（带完整错误处理）
+# 安全的克隆函数
 clone_if_missing() {
   local repo="$1"
   local branch="$2"
@@ -47,7 +47,7 @@ clone_if_missing() {
 main() {
   log "============================================"
   log "开始配置 纯净版原厂增强固件 专属环境"
-  log "核心诉求：预装 MosDNS+WG，daed 仅锁死底层依赖"
+  log "核心诉求：预装 MosDNS+WG，daed 仅锁死底层内核依赖"
   log "============================================"
   
   # ============================================
@@ -66,9 +66,9 @@ main() {
   sed -i -E 's|^root:[^:]*:|root::|' package/base-files/files/etc/shadow
   
   # ============================================
-  # 2. 彻底移除源码及 Feeds 中所有冲突的旧残余（防止系统扫描 Makefile 报错）
+  # 2. 彻底清除源码及 Feeds 中关于 dae/daed 的一切残余
   # ============================================
-  log "强制清理残留的 dae / daed 编译源码，确保眼不见为净"
+  log "强制清理所有 dae / daed 编译源码与临时占位"
   rm -rf \
     feeds/packages/net/mosdns \
     feeds/packages/net/dae \
@@ -80,32 +80,21 @@ main() {
     package/v2ray-geodata \
     package/v2ray-geoip \
     package/v2ray-geosite \
+    package/daed-i18n-placeholder \
     2>/dev/null || true
   
   # ============================================
-  # 3. 克隆必要的仓库
+  # 3. 克隆必要的仓库（仅保留 MosDNS）
   # ============================================
   log "开始克隆最新版 MosDNS 源码"
-  # 克隆成熟的 MosDNS v5 分支（带完整中文面板）
   if ! clone_if_missing "https://github.com" "v5" "package/luci-app-mosdns"; then
     return 1
   fi
 
-  # 修复核心：QiuSimons 的仓库真实主分支为 master，修正分支参数防止编译报错
-  log "克隆 daed 语言包用于固件占位..."
-  if ! clone_if_missing "https://github.com/QiuSimons/luci-app-daed" "master" "package/daed-i18n-placeholder"; then
-    return 1
-  fi
-  
-  # 骚操作提取：只保留语言包所需的 i18n 翻译目录和核心文件，移除非必要的编译干扰
-  log "清洗 daed 临时目录，仅保留基础本地化文件..."
-  mv package/daed-i18n-placeholder/luci-app-daed/po package/daed-i18n-placeholder/ 2>/dev/null || true
-  find package/daed-i18n-placeholder -maxdepth 1 ! -name 'po' ! -name 'daed-i18n-placeholder' -exec rm -rf {} + 2>/dev/null || true
-  
   # ============================================
-  # 4. 满血刷新 feeds 补充缺失的 Python/Zabbix 依赖
+  # 4. 满血刷新 feeds 补充缺失的组件依赖
   # ============================================
-  log "刷新 feeds，补齐系统 host 工具链..."
+  log "刷新 feeds，补齐系统工具链..."
   if ! ./scripts/feeds update -a 2>&1; then
     error "feeds update 失败"
     return 1
