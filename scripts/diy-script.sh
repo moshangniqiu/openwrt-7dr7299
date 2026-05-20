@@ -87,7 +87,7 @@ main() {
   # 3. 克隆必要的仓库（仅保留 MosDNS）
   # ============================================
   log "开始克隆最新版 MosDNS 源码"
-  if ! clone_if_missing "https://github.com" "v5" "package/luci-app-mosdns"; then
+  if ! clone_if_missing "https://github.com/sbwml/luci-app-mosdns" "v5" "package/luci-app-mosdns"; then
     return 1
   fi
 
