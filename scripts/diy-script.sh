@@ -104,6 +104,27 @@ main() {
     return 1
   fi
 
+   # 4.3 【新增】从你的仓库路径复制并注入 Go 1.26
+  # ============================================
+  local workspace_root="${GITHUB_WORKSPACE:-$(pwd)}"
+  local golang126_src_dir="$workspace_root/scripts/golang1.26"
+  local golang126_feed_dir="feeds/packages/lang/golang1.26"
+
+  log "检查源码仓中的 Go 1.26 工具链..."
+  if [ -d "$golang126_src_dir" ]; then
+    log "成功定位！正在注入 Go 1.26 独立工具链..."
+    rm -rf "$golang126_feed_dir"
+    mkdir -p "$golang126_feed_dir"
+    cp -rf "$golang126_src_dir/." "$golang126_feed_dir/"
+    
+    # 注册组件索引使其在编译树中生效
+    ./scripts/feeds install golang1.26
+  else
+    error "致命错误: 无法在 $golang126_src_dir 找到 Go 1.26 源码！请确认文件已提交！"
+    return 1
+  fi
+
+
   # ============================================
   # 4.5 定向配置：仅让 mosdns 和 dae 使用 golang1.26 工具链
   # ============================================
