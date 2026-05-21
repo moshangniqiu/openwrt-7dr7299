@@ -103,6 +103,24 @@ main() {
     error "feeds install 失败"
     return 1
   fi
+
+  # ============================================
+  # 4.5 定向配置：仅让 mosdns 和 dae 使用 golang1.26 工具链
+  # ============================================
+  log "开始为 mosdns 和 dae 强绑定 golang1.26 独立工具链"
+  
+  # 深度遍历所有包含 mosdns 或 dae 关键字的 Makefile 并精准替换
+  find package/ feeds/ -type f -name "Makefile" 2>/dev/null | grep -E "mosdns|dae" | while read -r makefile; do
+    log "-> 正在定向替换工具链: $makefile"
+    sed -i -e 's|golang/golang-package.mk|golang1.26/golang-package.mk|g' \
+           -e 's|golang/host|golang1.26/host|g' "$makefile"
+  done
+
+  # 额外防御：检查 mosdns 和 dae 源码目录下的 go.mod 限制，统一提升至 go 1.26 释放兼容性
+  find package/ feeds/ -type f -name "go.mod" 2>/dev/null | grep -E "mosdns|dae" | while read -r gomod; do
+    log "-> 正在调整 Go 版本声明: $gomod"
+    sed -i -E 's/go 1\.[0-9]+/go 1.26/g' "$gomod"
+  done
   
   # ============================================
   # 5. 修改固件版本号为当天编译日期
