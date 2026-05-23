@@ -156,10 +156,18 @@ main() {
   else
     sed -i "s/^VERSION_NUMBER:=.*/VERSION_NUMBER:=-$date_version by Imouto-Advanced/" "$version_file"
   fi
-  
+
+    # 👇=== 就是这里！把下面这 5 行复制到这里 ===👇
+  log "正在从种子配置中剔除 btop 组件..."
+  if [ -f ".config" ]; then
+    sed -i '/CONFIG_PACKAGE_btop=y/d' .config
+    echo "CONFIG_PACKAGE_btop=n" >> .config
+  fi
+  # 👆========================================👆
+
   log "✓ 所有定制环境完美配置完成！"
 }
-
+  
 # 执行主函数
 main "$@" || {
   error "脚本执行失败，请检查上述错误信息"
