@@ -1,17 +1,1 @@
-<img src="https://avatars.githubusercontent.com/u/53193414?s=200&v=4" alt="logo" width="200" height="200" align="right">
 
-## 特别提示 
-
-- **本人不对任何人因使用本固件所遭受的任何理论或实际的损失承担责任！**
-- **本固件禁止用于任何商业用途，请务必严格遵守国家互联网使用相关法律规定！**
-
-## 项目说明 
-
-- 固件机型：`TP-Link TL-7DR7299 v1 闭源固件`
-- 固件默认管理地址：`192.168.123.1`
-- 默认用户：`root`
-- 默认密码：`无`
-- 编译源码：[padavanonly/immortalwrt-mt798x-6.6](https://github.com/padavanonly/immortalwrt-mt798x-6.6.git)
-- 源码分支：`mt798x-mt799x-6.6-mtwifi`
-- 在线编译工作流：[`.github/workflows/Build.yml`](.github/workflows/Build.yml)
-- 专用配置文件：[configs/TL-7DR7299.txt](configs/TL-7DR7299.txt)（机型基础配置） + [configs/CUSTOMIZE.txt](configs/CUSTOMIZE.txt)（功能定制配置）
