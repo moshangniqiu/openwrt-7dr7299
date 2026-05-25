@@ -90,6 +90,10 @@ main() {
   if ! clone_if_missing "https://github.com/sbwml/luci-app-mosdns" "v5" "package/luci-app-mosdns"; then
     return 1
   fi
+  log "开始克隆最新版 luci-app-daed 源码"
+  if ! clone_if_missing "https://github.com/QiuSimons/luci-app-daed" "master" "package/luci-app-daed"; then
+    return 1
+  fi
 
   # ============================================
   # 4. 满血刷新 feeds 补充缺失的组件依赖
