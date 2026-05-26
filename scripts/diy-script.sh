@@ -141,6 +141,13 @@ main() {
            -e 's|golang/host|golang1.26/host|g' "$makefile"
   done
 
+  # 4.6 【新增】清除 Go 1.26 不再支持的过时实验性参数 runtimefreegc
+  log "正在清理 daed 源码中过时的 runtimefreegc 参数..."
+  find package/ feeds/ -type f -name "Makefile" 2>/dev/null | grep -E "daed|dae" | while read -r makefile; do
+    sed -i '/GO_EXPERIMENT:=runtimefreegc/d' "$makefile"
+    sed -i '/GO_EXPERIMENT = runtimefreegc/d' "$makefile"
+  done
+
   # 额外防御：检查 mosdns 和 dae 源码目录下的 go.mod 限制，统一提升至 go 1.26 释放兼容性
   find package/ feeds/ -type f -name "go.mod" 2>/dev/null | grep -E "mosdns|dae" | while read -r gomod; do
     log "-> 正在调整 Go 版本声明: $gomod"
