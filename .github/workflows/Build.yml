@@ -79,7 +79,36 @@ jobs:
         [ -e $CONFIG_BASE ] && cat $CONFIG_BASE > $OPENWRT_PATH/.config
         [ -e $CONFIG_CUSTOM ] && cat $CONFIG_CUSTOM >> $OPENWRT_PATH/.config
         [ -e "$GITHUB_WORKSPACE/$DIY_SCRIPT" ] && chmod +x "$GITHUB_WORKSPACE/$DIY_SCRIPT" && cd "$OPENWRT_PATH" && "$GITHUB_WORKSPACE/$DIY_SCRIPT"
+        
         cd $OPENWRT_PATH
+        
+        # =============== 终极修复：强制开启内核 BPF 流量控制 ===============
+        # 1. 解除 generic 目录和所有平台特定的内核配置硬限制
+        find target/linux/ -name "config-*" -exec sed -i 's/# CONFIG_NET_CLS_BPF is not set/CONFIG_NET_CLS_BPF=y/g' {} +
+        find target/linux/ -name "config-*" -exec sed -i 's/# CONFIG_NET_SCH_INGRESS is not set/CONFIG_NET_SCH_INGRESS=y/g' {} +
+        find target/linux/ -name "config-*" -exec sed -i 's/# CONFIG_BPF_SYSCALL is not set/CONFIG_BPF_SYSCALL=y/g' {} +
+        
+        # 2. 向通用内核配置追加覆盖选项
+        echo -e "CONFIG_NET_CLS_BPF=y\nCONFIG_NET_SCH_INGRESS=y\nCONFIG_NET_CLS_ACT=y\nCONFIG_BPF_SYSCALL=y\nCONFIG_CGROUP_BPF=y" >> target/linux/generic/config-6.6
+        
+        # =============== 补全软件包依赖（dae 核心与 LuCI 修复） ===============
+        # 3. 强制在 .config 中勾选 BPF 内核组件
+        echo "CONFIG_KERNEL_BPF_EVENTS=y" >> .config
+        echo "CONFIG_KERNEL_CGROUP_BPF=y" >> .config
+        echo "CONFIG_PACKAGE_kmod-sched-core=y" >> .config
+        echo "CONFIG_PACKAGE_kmod-sched-bpf=y" >> .config
+        
+        # 4. 强制在 .config 中补全防火墙兼容层与 LuCI/uHTTPd 组件
+        echo "CONFIG_PACKAGE_kmod-nft-compat=y" >> .config
+        echo "CONFIG_PACKAGE_xtables-nft=y" >> .config
+        echo "CONFIG_PACKAGE_uhttpd=y" >> .config
+        echo "CONFIG_PACKAGE_luci=y" >> .config
+        echo "CONFIG_LUCI_LANG_zh_Hans=y" >> .config
+        echo "CONFIG_PACKAGE_luci-mod-admin-full=y" >> .config
+        echo "CONFIG_PACKAGE_rpcd=y" >> .config
+        echo "CONFIG_PACKAGE_uhttpd-mod-ubus=y" >> .config
+        
+        # 让 OpenWrt 自动依据上述硬性修改补全链条依赖
         make defconfig
 
     - name: Generate Variables(生成变量)
