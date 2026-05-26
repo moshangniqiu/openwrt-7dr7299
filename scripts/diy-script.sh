@@ -201,26 +201,26 @@ EOF
   # 6.3 强行注入主 .config 配置（确保编译输出内核头文件与防火墙兼容组件，解决 LuCI 打不开）
   if [ -f ".config" ]; then
     log "正在追加核心 BPF 工具链与 LuCI 防火墙配置至 .config..."
-    cat << 'EOF' >> .config
-  # BPF Developer Tools & Headers (修复 go generate 编译闪退的关键)
-  CONFIG_KERNEL_BPF_EVENTS=y
-  CONFIG_KERNEL_CGROUP_BPF=y
-  CONFIG_PACKAGE_kmod-sched-core=y
-  CONFIG_PACKAGE_kmod-sched-bpf=y
+  cat << 'EOF' >> .config
+# BPF Developer Tools & Headers (修复 go generate 编译闪退的关键)
+CONFIG_KERNEL_BPF_EVENTS=y
+CONFIG_KERNEL_CGROUP_BPF=y
+CONFIG_PACKAGE_kmod-sched-core=y
+CONFIG_PACKAGE_kmod-sched-bpf=y
 
-  # 强制 OpenWrt 在编译阶段解压并分发 Linux 官方内核 BPF 头文件
-  CONFIG_PACKAGE_bpf-headers=y
+# 强制 OpenWrt 在编译阶段解压并分发 Linux 官方内核 BPF 头文件
+CONFIG_PACKAGE_bpf-headers=y
 
-  # Firewall & LuCI Compatibility 
-  CONFIG_PACKAGE_kmod-nft-compat=y
-  CONFIG_PACKAGE_xtables-nft=y
-  CONFIG_PACKAGE_uhttpd=y
-  CONFIG_PACKAGE_luci=y
-  CONFIG_LUCI_LANG_zh_Hans=y
-  CONFIG_PACKAGE_luci-mod-admin-full=y
-  CONFIG_PACKAGE_rpcd=y
-  CONFIG_PACKAGE_uhttpd-mod-ubus=y
-  EOF
+# Firewall & LuCI Compatibility 
+CONFIG_PACKAGE_kmod-nft-compat=y
+CONFIG_PACKAGE_xtables-nft=y
+CONFIG_PACKAGE_uhttpd=y
+CONFIG_PACKAGE_luci=y
+CONFIG_LUCI_LANG_zh_Hans=y
+CONFIG_PACKAGE_luci-mod-admin-full=y
+CONFIG_PACKAGE_rpcd=y
+CONFIG_PACKAGE_uhttpd-mod-ubus=y
+EOF
   fi
 
   log "✓ 所有定制环境完美配置完成！"
