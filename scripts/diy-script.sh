@@ -188,15 +188,15 @@ main() {
   
   # 6.2 向通用内核配置追加覆盖选项
   cat << 'EOF' >> target/linux/generic/config-6.6
-  CONFIG_NET_CLS_BPF=y
-  CONFIG_NET_SCH_INGRESS=y
-  CONFIG_NET_CLS_ACT=y
-  CONFIG_BPF_SYSCALL=y
-  CONFIG_CGROUP_BPF=y
-  CONFIG_BPF_JIT=y
-  CONFIG_BPF_JIT_ALWAYS_ON=y
-  CONFIG_DEBUG_INFO_BTF=y
-  EOF
+CONFIG_NET_CLS_BPF=y
+CONFIG_NET_SCH_INGRESS=y
+CONFIG_NET_CLS_ACT=y
+CONFIG_BPF_SYSCALL=y
+CONFIG_CGROUP_BPF=y
+CONFIG_BPF_JIT=y
+CONFIG_BPF_JIT_ALWAYS_ON=y
+CONFIG_DEBUG_INFO_BTF=y
+EOF
   
   # 6.3 强行注入主 .config 配置（确保编译输出内核头文件与防火墙兼容组件，解决 LuCI 打不开）
   if [ -f ".config" ]; then
