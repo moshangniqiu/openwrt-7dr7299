@@ -176,9 +176,56 @@ main() {
   fi
   # 👆========================================👆
 
+  # ============================================
+  # 6. 【全面修复】强力注入 BPF 内核头文件支持与组件勾选
+  # ============================================
+  log "开始终极配置：强制开启内核 eBPF 全套支持与头文件分发"
+  
+  # 6.1 解除 generic 目录和所有平台特定的内核配置硬限制（解决 dae 无法启动）
+  find target/linux/ -name "config-*" -exec sed -i 's/# CONFIG_NET_CLS_BPF is not set/CONFIG_NET_CLS_BPF=y/g' {} +
+  find target/linux/ -name "config-*" -exec sed -i 's/# CONFIG_NET_SCH_INGRESS is not set/CONFIG_NET_SCH_INGRESS=y/g' {} +
+  find target/linux/ -name "config-*" -exec sed -i 's/# CONFIG_BPF_SYSCALL is not set/CONFIG_BPF_SYSCALL=y/g' {} +
+  
+  # 6.2 向通用内核配置追加覆盖选项
+  cat << 'EOF' >> target/linux/generic/config-6.6
+  CONFIG_NET_CLS_BPF=y
+  CONFIG_NET_SCH_INGRESS=y
+  CONFIG_NET_CLS_ACT=y
+  CONFIG_BPF_SYSCALL=y
+  CONFIG_CGROUP_BPF=y
+  CONFIG_BPF_JIT=y
+  CONFIG_BPF_JIT_ALWAYS_ON=y
+  CONFIG_DEBUG_INFO_BTF=y
+  EOF
+  
+  # 6.3 强行注入主 .config 配置（确保编译输出内核头文件与防火墙兼容组件，解决 LuCI 打不开）
+  if [ -f ".config" ]; then
+    log "正在追加核心 BPF 工具链与 LuCI 防火墙配置至 .config..."
+    cat << 'EOF' >> .config
+  # BPF Developer Tools & Headers (修复 go generate 编译闪退的关键)
+  CONFIG_KERNEL_BPF_EVENTS=y
+  CONFIG_KERNEL_CGROUP_BPF=y
+  CONFIG_PACKAGE_kmod-sched-core=y
+  CONFIG_PACKAGE_kmod-sched-bpf=y
+
+  # 强制 OpenWrt 在编译阶段解压并分发 Linux 官方内核 BPF 头文件
+  CONFIG_PACKAGE_bpf-headers=y
+
+  # Firewall & LuCI Compatibility 
+  CONFIG_PACKAGE_kmod-nft-compat=y
+  CONFIG_PACKAGE_xtables-nft=y
+  CONFIG_PACKAGE_uhttpd=y
+  CONFIG_PACKAGE_luci=y
+  CONFIG_LUCI_LANG_zh_Hans=y
+  CONFIG_PACKAGE_luci-mod-admin-full=y
+  CONFIG_PACKAGE_rpcd=y
+  CONFIG_PACKAGE_uhttpd-mod-ubus=y
+  EOF
+  fi
+
   log "✓ 所有定制环境完美配置完成！"
 }
-  
+
 # 执行主函数
 main "$@" || {
   error "脚本执行失败，请检查上述错误信息"
