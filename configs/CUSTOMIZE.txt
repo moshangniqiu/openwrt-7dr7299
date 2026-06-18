@@ -5,26 +5,26 @@
 # ---------------------------------------------------------
 # DDNS
 # ---------------------------------------------------------
-CONFIG_PACKAGE_luci-app-ddns=y
-CONFIG_PACKAGE_luci-i18n-ddns-zh-cn=y
+# CONFIG_PACKAGE_luci-app-ddns=y
+# CONFIG_PACKAGE_luci-i18n-ddns-zh-cn=y
 
 # ---------------------------------------------------------
 # DiskMan
 # ---------------------------------------------------------
-CONFIG_PACKAGE_luci-app-diskman=n
-CONFIG_PACKAGE_luci-i18n-diskman-zh-cn=n
+# CONFIG_PACKAGE_luci-app-diskman=n
+# CONFIG_PACKAGE_luci-i18n-diskman-zh-cn=n
 
 # ---------------------------------------------------------
 # Argon Theme
 # ---------------------------------------------------------
-CONFIG_PACKAGE_luci-theme-argon=n
-CONFIG_PACKAGE_luci-app-argon-config=n
-CONFIG_PACKAGE_luci-i18n-argon-config-zh-cn=n
+# CONFIG_PACKAGE_luci-theme-argon=n
+# CONFIG_PACKAGE_luci-app-argon-config=n
+# CONFIG_PACKAGE_luci-i18n-argon-config-zh-cn=n
 
 # ---------------------------------------------------------
 # passwall
 # ---------------------------------------------------------
-CONFIG_PACKAGE_luci-app-passwall=y
+# CONFIG_PACKAGE_luci-app-passwall=y
 # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Haproxy is not set
 # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Hysteria is not set
 # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_NaiveProxy is not set
@@ -34,10 +34,10 @@ CONFIG_PACKAGE_luci-app-passwall=y
 # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Simple_Obfs is not set
 # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_SingBox is not set
 # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_tuic_client is not set
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Geodata=y
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Geoview=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Geodata=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Geoview=y
 # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Plugin is not set
-CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray=y
+# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray=y
 # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray_Plugin is not set
 
 # ---------------------------------------------------------
@@ -51,55 +51,68 @@ CONFIG_PACKAGE_v2ray-geosite=y
 # ---------------------------------------------------------
 # EasyTier
 # ---------------------------------------------------------
-CONFIG_EASYTIER_INCLUDE_WEBCONSOLE=n
-CONFIG_PACKAGE_luci-app-easytier=y
+# CONFIG_EASYTIER_INCLUDE_WEBCONSOLE=n
+# CONFIG_PACKAGE_luci-app-easytier=y
 
 # ---------------------------------------------------------
 # ZeroTier
 # ---------------------------------------------------------
-CONFIG_PACKAGE_zerotier=n
-CONFIG_PACKAGE_luci-app-zerotier=n
-CONFIG_PACKAGE_luci-i18n-zerotier-zh-cn=n
+# CONFIG_PACKAGE_zerotier=n
+# CONFIG_PACKAGE_luci-app-zerotier=n
+# CONFIG_PACKAGE_luci-i18n-zerotier-zh-cn=n
 
 # ---------------------------------------------------------
 # RTP2HTTPD
 # ---------------------------------------------------------
-CONFIG_PACKAGE_rtp2httpd=n
-CONFIG_PACKAGE_luci-app-rtp2httpd=n
-CONFIG_PACKAGE_luci-i18n-rtp2httpd-zh-cn=n
+# CONFIG_PACKAGE_rtp2httpd=n
+# CONFIG_PACKAGE_luci-app-rtp2httpd=n
+# CONFIG_PACKAGE_luci-i18n-rtp2httpd-zh-cn=n
 
 # ---------------------------------------------------------
 # msd_lite
 # ---------------------------------------------------------
-CONFIG_PACKAGE_luci-app-msd_lite=n
-CONFIG_PACKAGE_luci-i18n-msd_lite-zh-cn=n
+# CONFIG_PACKAGE_luci-app-msd_lite=n
+# CONFIG_PACKAGE_luci-i18n-msd_lite-zh-cn=n
 # ---------------------------------------------------------
 
 # ---------------------------------------------------------
 # samba4
 # ---------------------------------------------------------
-CONFIG_PACKAGE_luci-app-samba4=n
-CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=n
+# CONFIG_PACKAGE_luci-app-samba4=n
+# CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=n
 # ---------------------------------------------------------
 
 # ---------------------------------------------------------
 # usb-printer
 # --------------------------------------------------------- 
-CONFIG_PACKAGE_kmod-usb-printer=n
-CONFIG_PACKAGE_luci-app-usb-printer=n
-CONFIG_PACKAGE_luci-i18n-usb-printer-zh-cn=n
+# CONFIG_PACKAGE_kmod-usb-printer=n
+# CONFIG_PACKAGE_luci-app-usb-printer=n
+# CONFIG_PACKAGE_luci-i18n-usb-printer-zh-cn=n
 # ---------------------------------------------------------
 
 # ---------------------------------------------------------
 # nlbwmon
 # ---------------------------------------------------------
-CONFIG_PACKAGE_luci-app-nlbwmon=n
-CONFIG_PACKAGE_luci-i18n-nlbwmon-zh-cn=n
+# CONFIG_PACKAGE_luci-app-nlbwmon=n
+# CONFIG_PACKAGE_luci-i18n-nlbwmon-zh-cn=n
 # ---------------------------------------------------------
 
 # ---------------------------------------------------------
 # dashboard
 # ---------------------------------------------------------
-CONFIG_PACKAGE_luci-mod-dashboard=y
-CONFIG_PACKAGE_luci-i18n-dashboard-zh-cn=y
+# CONFIG_PACKAGE_luci-mod-dashboard=y
+# CONFIG_PACKAGE_luci-i18n-dashboard-zh-cn=y
 # ---------------------------------------------------------
+
+
+# ---------------------------------------------------------
+# Mosdns
+# ---------------------------------------------------------
+CONFIG_PACKAGE_luci-app-mosdns=y
+CONFIG_PACKAGE_mosdns=y
+CONFIG_PACKAGE_luci-i18n-mosdns-zh-cn=y
+
+# ---------------------------------------------------------
+# wireguard
+# ---------------------------------------------------------
+CONFIG_PACKAGE_luci-proto-wireguard=y
