@@ -4,8 +4,8 @@ set -e -o pipefail
 echo "=== diy-script: 开始自定义编译配置 ==="
 
 # 修改默认IP
-echo "[diy] 修改默认IP为 192.168.123.1"
-sed -i 's/192.168.6.1/192.168.123.1/g' package/base-files/files/bin/config_generate
+echo "[diy] 修改默认IP为 10.1.1.1"
+sed -i 's/192.168.6.1/10.1.1.1/g' package/base-files/files/bin/config_generate
 sed -i -E 's|^root:[^:]*:|root::|' package/base-files/files/etc/shadow
 
 # 移除要替换的包（来自官方 feeds）
@@ -25,15 +25,16 @@ clone_if_missing() {
   fi
 }
 
-clone_if_missing https://github.com/sbwml/luci-app-mosdns              ""     package/luci-app-mosdns
-clone_if_missing https://github.com/ximiTech/luci-app-msd_lite         ""     package/luci-app-msd_lite
-clone_if_missing https://github.com/ximiTech/msd_lite                  ""     package/msd_lite
-clone_if_missing https://github.com/pymumu/luci-app-smartdns           ""     package/luci-app-smartdns
-clone_if_missing https://github.com/pymumu/openwrt-smartdns            ""     package/smartdns
+clone_if_missing https://github.com/sbwml/luci-app-mosdns              "v5"     package/luci-app-mosdns
+clone_if_missing https://github.com/sbwml/v2ray-geodata                 ""      package/v2ray-geodata
+#clone_if_missing https://github.com/ximiTech/luci-app-msd_lite         ""     package/luci-app-msd_lite
+#clone_if_missing https://github.com/ximiTech/msd_lite                  ""     package/msd_lite
+#clone_if_missing https://github.com/pymumu/luci-app-smartdns           ""     package/luci-app-smartdns
+#clone_if_missing https://github.com/pymumu/openwrt-smartdns            ""     package/smartdns
 clone_if_missing https://github.com/QiuSimons/luci-app-daed            ""     package/dae
-clone_if_missing https://github.com/Openwrt-Passwall/openwrt-passwall-packages "" package/passwall-packages
-clone_if_missing https://github.com/Openwrt-Passwall/openwrt-passwall  ""     package/passwall-luci
-clone_if_missing https://github.com/EasyTier/luci-app-easytier.git     ""     package/luci-app-easytier
+#clone_if_missing https://github.com/Openwrt-Passwall/openwrt-passwall-packages "" package/passwall-packages
+#clone_if_missing https://github.com/Openwrt-Passwall/openwrt-passwall  ""     package/passwall-luci
+#clone_if_missing https://github.com/EasyTier/luci-app-easytier.git     ""     package/luci-app-easytier
 
 
 WORKSPACE_ROOT="${GITHUB_WORKSPACE:-$(pwd)}"
@@ -66,6 +67,6 @@ fi
 DATE_VERSION="$(date +%Y.%m.%d)"
 VERSION_FILE="include/version.mk"
 echo "[diy] 修改版本为编译日期: $DATE_VERSION"
-sed -i "s/^VERSION_NUMBER:=.*/VERSION_NUMBER:=-$DATE_VERSION by WoChen5770/" "$VERSION_FILE"
+sed -i "s/^VERSION_NUMBER:=.*/VERSION_NUMBER:=-$DATE_VERSION by moshangniqiu/" "$VERSION_FILE"
 
 echo "=== diy-script: 完成 ==="
