@@ -1,4 +1,4 @@
-name: Build
+name: Build-6.6
 
 on:
   workflow_dispatch:
@@ -19,9 +19,10 @@ permissions: write-all
 env:
   REPO_URL: https://github.com/padavanonly/immortalwrt-mt798x-6.6.git
   REPO_BRANCH: mt798x-mt799x-6.6-mtwifi
-  CONFIG_BASE: configs/TL-7DR7299.txt
+  CONFIG_BASE: configs/6.6.txt
   CONFIG_CUSTOM: configs/CUSTOMIZE.txt
   DIY_SCRIPT: scripts/diy-script.sh
+  DIY_SCRIPT_2: scripts/diy-6.6.sh
   CACHE_TOOLCHAIN: true
   UPLOAD_BIN_DIR: false
   FIRMWARE_RELEASE: true
@@ -86,6 +87,7 @@ jobs:
         [ -e $CONFIG_BASE ] && cat $CONFIG_BASE > $OPENWRT_PATH/.config
         [ -e $CONFIG_CUSTOM ] && cat $CONFIG_CUSTOM >> $OPENWRT_PATH/.config
         [ -e "$GITHUB_WORKSPACE/$DIY_SCRIPT" ] && chmod +x "$GITHUB_WORKSPACE/$DIY_SCRIPT" && cd "$OPENWRT_PATH" && "$GITHUB_WORKSPACE/$DIY_SCRIPT"
+        [ -e "$GITHUB_WORKSPACE/$DIY_SCRIPT_2" ] && chmod +x "$GITHUB_WORKSPACE/$DIY_SCRIPT_2" && cd "$OPENWRT_PATH" && "$GITHUB_WORKSPACE/$DIY_SCRIPT_2"
         cd $OPENWRT_PATH
         make defconfig
 
@@ -171,7 +173,7 @@ jobs:
       with:
         name: ImmortalWrt ${{ env.FIRMWARE_TAG }} (${{ env.DATE }})
         allowUpdates: true
-        tag: ${{ env.FIRMWARE_TAG }}-${{ env.FILE_DATE }}
+        tag: ${{ env.FIRMWARE_TAG }}-${{ env.VERSION_KERNEL }}
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: ${{ env.FIRMWARE_PATH }}/*
         body: |
