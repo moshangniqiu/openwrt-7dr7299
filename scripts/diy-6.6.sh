@@ -11,7 +11,7 @@ cp -rf "$GOLANG126_SRC_DIR/." "$GOLANG126_FEED_DIR/"
 ./scripts/feeds install golang1.26
 
 # passwall daed use golang1.26/host
-find package/dae package/passwall-packages -name "Makefile" -type f -exec sed -i \
+find package/dae -name "Makefile" -type f -exec sed -i \
   -e 's|\<golang/golang-package.mk\>|golang1.26/golang-package.mk|g' \
   -e 's|\<golang/host\>|golang1.26/host|g' {} +
 
