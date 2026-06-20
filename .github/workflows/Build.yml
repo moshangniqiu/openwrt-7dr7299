@@ -4,11 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       clean_toolchain:
-        description: '清理缓存工具链'
+        description: '是否清理已缓存的工具链（强制重新编译）'
         required: false
         default: 'false'
         type: choice
-        options: ['false', 'true']
+        options:
+          - 'false'
+          - 'true'
   schedule:
     - cron: '0 18 */3 * *'
 
@@ -21,7 +23,7 @@ env:
   CONFIG_CUSTOM: configs/CUSTOMIZE.txt
   DIY_SCRIPT: scripts/diy-script.sh
   DIY_SCRIPT_2: scripts/diy-6.6.sh
-  CACHE_TOOLCHAIN: false
+  CACHE_TOOLCHAIN: true
   UPLOAD_BIN_DIR: false
   FIRMWARE_RELEASE: true
   FIRMWARE_TAG: TL-7DR7299-v1
@@ -30,104 +32,157 @@ env:
 jobs:
   Build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Free disk space
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: false
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: false
+    - name: Free disk space
+      uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: false
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        docker-images: true
+        swap-storage: false
 
-      - name: Install build dependencies & LLVM 14 (Fix BPF clang missing)
-        run: |
-          sudo apt-get update
-          sudo apt install -y build-essential flex bison gawk gcc-multilib git curl unzip python3 file rsync libncurses5-dev libncursesw5-dev zlib1g-dev wget software-properties-common
-          # 官方llvm一键安装脚本
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh 14 all
-          # 全局软链接统一clang命令
-          sudo ln -sf /usr/bin/clang-14 /usr/bin/clang
-          sudo ln -sf /usr/bin/clang++-14 /usr/bin/clang++
-          sudo ln -sf /usr/bin/llvm-strip-14 /usr/bin/llvm-strip
-          sudo ln -sf /usr/bin/llc-14 /usr/bin/llc
-          # 打印校验日志
-          echo "=== Clang Info ==="
-          which clang
-          clang --version
-          llc --version
+    - name: Initialization Environment(初始化环境)
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo mkdir -p /etc/apt/preferences.d
+        sudo tee /etc/apt/preferences.d/nosnap.pref > /dev/null << 'EOF'
+        Package: snapd
+        Pin: release a=*
+        Pin-Priority: -10
+        EOF
+        sudo apt-get purge -y snapd
+        sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
+        sudo -E apt -yqq install dos2unix libfuse-dev
+        sudo -E apt -yqq autoremove --purge
+        sudo -E apt -yqq autoclean
+        sudo -E apt -yqq clean
+        sudo -E systemctl daemon-reload
+        sudo timedatectl set-timezone "$TZ"
 
-      - name: Checkout workflow repo
-        uses: actions/checkout@v5
+    - name: Checkout
+      uses: actions/checkout@v5
 
-      - name: Clone ImmortalWrt source
-        run: |
-          git clone "$REPO_URL" -b "$REPO_BRANCH" openwrt
-          cd openwrt
-          echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
+    - name: Clone Source Code(克隆源代码)
+      run: |
+        df -hT $GITHUB_WORKSPACE
+        git clone "$REPO_URL" -b "$REPO_BRANCH" openwrt
+        cd openwrt
+        echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
+        VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
+        echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
 
-      - name: Update & Install feeds
-        run: |
-          cd $OPENWRT_PATH
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
+    - name: Update Feeds(更新feeds)
+      run: |
+        cd $OPENWRT_PATH
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
 
-      - name: Merge custom config & diy script
-        run: |
-          [ -e $CONFIG_BASE ] && cat $CONFIG_BASE > $OPENWRT_PATH/.config
-          [ -e $CONFIG_CUSTOM ] && cat $CONFIG_CUSTOM >> $OPENWRT_PATH/.config
+    - name: Load Custom Configuration(加载自定义配置)
+      run: |
+        [ -e files ] && mv files $OPENWRT_PATH/files
+        [ -e $CONFIG_BASE ] && cat $CONFIG_BASE > $OPENWRT_PATH/.config
+        [ -e $CONFIG_CUSTOM ] && cat $CONFIG_CUSTOM >> $OPENWRT_PATH/.config
+        [ -e "$GITHUB_WORKSPACE/$DIY_SCRIPT" ] && chmod +x "$GITHUB_WORKSPACE/$DIY_SCRIPT" && cd "$OPENWRT_PATH" && "$GITHUB_WORKSPACE/$DIY_SCRIPT"
+        [ -e "$GITHUB_WORKSPACE/$DIY_SCRIPT_2" ] && chmod +x "$GITHUB_WORKSPACE/$DIY_SCRIPT_2" && cd "$OPENWRT_PATH" && "$GITHUB_WORKSPACE/$DIY_SCRIPT_2"
+        cd $OPENWRT_PATH
+        make defconfig
 
-          # 执行自定义DIY脚本
-          [ -e "$GITHUB_WORKSPACE/$DIY_SCRIPT" ] && \
-            chmod +x "$GITHUB_WORKSPACE/$DIY_SCRIPT" && \
-            cd $OPENWRT_PATH && "$GITHUB_WORKSPACE/$DIY_SCRIPT"
+    - name: Generate Variables(生成变量)
+      run: |
+        cd $OPENWRT_PATH
+        SOURCE_REPO="$(echo $REPO_URL | awk -F '/' '{print $(NF)}')"
+        SOURCE_REPO="${SOURCE_REPO%.git}"
+        echo "SOURCE_REPO=$SOURCE_REPO" >> $GITHUB_ENV
+        DEVICE_TARGET=$(grep CONFIG_TARGET_BOARD .config | awk -F '"' '{print $2}')
+        echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
+        DEVICE_SUBTARGET=$(grep CONFIG_TARGET_SUBTARGET .config | awk -F '"' '{print $2}')
+        echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
+        DEVICE_PROFILE=$(grep '^CONFIG_TARGET_.*DEVICE_.*=y$' .config | sed 's/^CONFIG_TARGET_//; s/=y$//' | tail -n 1)
+        echo "DEVICE_PROFILE=$DEVICE_PROFILE" >> $GITHUB_ENV
 
-          [ -e "$GITHUB_WORKSPACE/$DIY_SCRIPT_2" ] && \
-            chmod +x "$GITHUB_WORKSPACE/$DIY_SCRIPT_2" && \
-            cd $OPENWRT_PATH && "$GITHUB_WORKSPACE/$DIY_SCRIPT_2"
+    - name: Cache Clean(清理缓存)
+      if: github.event.inputs.clean_toolchain == 'true'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: gh cache delete --all
 
-          cd $OPENWRT_PATH
-          # 容错：检测无clang时自动关闭BPF headers
-          if ! command -v clang &> /dev/null; then
-            sed -i 's/CONFIG_KERNEL_BPF_HEADERS=y/# CONFIG_KERNEL_BPF_HEADERS is not set/' .config
-          fi
-          make defconfig
+    - name: Cache Toolchain(缓存工具链)
+      if: env.CACHE_TOOLCHAIN == 'true'
+      uses: HiGarfield/cachewrtbuild@main
+      with:
+        ccache: true
+        toolchain: true
+        mixkey: ${{ env.SOURCE_REPO }}-${{ env.REPO_BRANCH }}-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
+        prefix: ${{ env.OPENWRT_PATH }}
 
-      - name: Download source packages
-        run: |
-          cd $OPENWRT_PATH
-          make download -j8
+    - name: Download DL Package(下载DL软件包)
+      run: |
+        cd $OPENWRT_PATH
+        make download -j8
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
 
-      - name: Compile firmware (Force BPF_CLANG path, clean old cache first)
-        run: |
-          cd $OPENWRT_PATH
-          echo "Build threads: $(nproc)"
-          # 清理报错bpf包与旧staging缓存
-          make package/kernel/bpf-headers/clean
-          rm -rf staging_dir/host staging_dir/target-*
-          # 强制指定clang路径，彻底消除 /invalid/clang
-          make BPF_CLANG=/usr/bin/clang -j$(nproc) || make BPF_CLANG=/usr/bin/clang -j1 V=s
+    - name: Compile Firmware(开始编译固件)
+      id: compile
+      run: |
+        cd $OPENWRT_PATH
+        echo -e "$(nproc) thread compile"
+        make -j$(nproc) || make -j1 V=s
+        echo "status=success" >> $GITHUB_OUTPUT
+        echo "DATE=$(date +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
+        echo "FILE_DATE=$(date +"%Y.%m.%d")" >> $GITHUB_ENV
 
-      - name: Check disk space
-        run: df -hT
+    - name: Check Space Usage(检查空间使用情况)
+      if: (!cancelled())
+      run: df -hT
 
-      - name: Organize firmware files
-        run: |
-          cd $OPENWRT_PATH/bin/targets/*/*
-          cp $OPENWRT_PATH/.config build.config || true
-          echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
+    - name: Upload Bin Directory(上传bin目录)
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.SOURCE_REPO }}-bin-${{ env.FIRMWARE_TAG }}-${{ env.FILE_DATE }}
+        path: ${{ env.OPENWRT_PATH }}/bin
 
-      - name: Upload firmware to Release
-        if: env.FIRMWARE_RELEASE == 'true'
-        uses: ncipollo/release-action@v1
-        with:
-          name: ImmortalWrt ${{ env.FIRMWARE_TAG }}
-          tag: ${{ env.FIRMWARE_TAG }}
-          allowUpdates: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: ${{ env.FIRMWARE_PATH }}/*
+    - name: Organize Files(整理文件)
+      if: steps.compile.outputs.status == 'success'
+      run: |
+        cd $OPENWRT_PATH/bin/targets/*/*
+        cat sha256sums
+        echo "VERSION_KERNEL=$(find -type f -name "*.manifest" -exec grep -oP '^kernel - \K.*?(?=~|-\d+-)' {} \;)" >> $GITHUB_ENV
+        cp $OPENWRT_PATH/.config build.config
+        mkdir -p packages
+        [ -d $OPENWRT_PATH/bin/packages ] && find $OPENWRT_PATH/bin/packages -type f -name "*.ipk" -exec cp -f {} packages \;
+        [ -d packages ] && tar -zcf Packages.tar.gz packages || true
+        rm -rf feeds.buildinfo version.buildinfo
+        echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
+
+    - name: Upload Firmware To Artifact(将固件上传到Artifact)
+      if: steps.compile.outputs.status == 'success' && env.FIRMWARE_RELEASE != 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.SOURCE_REPO }}-firmware-${{ env.FIRMWARE_TAG }}-${{ env.FILE_DATE }}
+        path: ${{ env.FIRMWARE_PATH }}
+
+    - name: Upload Firmware To Release(发布固件)
+      if: steps.compile.outputs.status == 'success' && env.FIRMWARE_RELEASE == 'true'
+      uses: ncipollo/release-action@v1
+      with:
+        name: ImmortalWrt ${{ env.FIRMWARE_TAG }} (${{ env.DATE }})
+        allowUpdates: true
+        tag: ${{ env.FIRMWARE_TAG }}-${{ env.VERSION_KERNEL }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: ${{ env.FIRMWARE_PATH }}/*
+        body: |
+          **This is OpenWrt Firmware for ${{ env.FIRMWARE_TAG }}**
+          ### 固件信息(${{ env.DEVICE_PROFILE }})
+          - 默认地址: 192.168.123.1
+          - 默认密码: 无
+          - 固件内核版本：${{ env.VERSION_KERNEL }}
+          - 固件源码: ${{ env.REPO_URL }}
+          - 源码分支: ${{ env.REPO_BRANCH }}
+          - 固件编译前最后一次➦[源码更新记录](${{ env.REPO_URL }})
+          - ${{ env.VERSION_INFO }}
