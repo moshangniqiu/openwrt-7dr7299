@@ -22,6 +22,7 @@ env:
   CONFIG_BASE: configs/TL-7DR7299.txt
   CONFIG_CUSTOM: configs/CUSTOMIZE.txt
   DIY_SCRIPT: scripts/diy-script.sh
+  DIY_SCRIPT_2: scripts/diy-6.6.sh
   CACHE_TOOLCHAIN: true
   UPLOAD_BIN_DIR: false
   FIRMWARE_RELEASE: true
