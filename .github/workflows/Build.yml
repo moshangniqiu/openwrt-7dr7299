@@ -119,6 +119,12 @@ jobs:
         mixkey: ${{ env.SOURCE_REPO }}-${{ env.REPO_BRANCH }}-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
         prefix: ${{ env.OPENWRT_PATH }}
 
+    - name: Install LLVM/Clang   👈 加这里
+      run: |
+        sudo apt update
+        sudo apt install -y clang llvm lld
+
+
     - name: Download DL Package(下载DL软件包)
       run: |
         cd $OPENWRT_PATH
